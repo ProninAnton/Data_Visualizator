@@ -4,8 +4,6 @@ import QtQuick.Dialogs 1.2
 
 //Объект отображения верхней панели
 Item {
-    property string date: ""
-    property string time: ""
     Rectangle {
         id: topBar
         anchors {
@@ -23,23 +21,44 @@ Item {
             width: parent.width
 
             Button {
+                id: buttonLoadFile
                 text: "Выбрать файл"
                 anchors.verticalCenter: parent.verticalCenter
-                onClicked: fileProcessing.openFile()
+                onClicked: {
+                    enableButton()
+                    fileDialog.open()
+                }
             }
-
             Text {
                 id: dateText
-                text: "Дата: " + date
+                text: "Дата: "
                 anchors.verticalCenter: parent.verticalCenter
                 visible: false
             }Text {
                 id: timeText
-                text: "Время: " + time
+                text: "Время: "
                 anchors.verticalCenter: parent.verticalCenter
                 visible: false
             }
         }
+    }
+    FileDialog {
+        id: fileDialog
+        title: "Выберите файл"
+        selectExisting: true
+        nameFilters: [ "Файл измерений (*.s1p)", "All files (*)" ]
+        selectedNameFilter: "Файл измерений (*.s1p)"
+        onAccepted: {
+            fpWrapper.openFile(fileUrl)
+        }
+        onRejected: {
+            errorDialog.open()
+            enableButton();
+        }
+    }
+
+    function enableButton() {
+        buttonLoadFile.enabled = (buttonLoadFile.enabled == true ? false : true)
     }
 
     function setDate(date) {
@@ -60,14 +79,6 @@ Item {
             timeText.visible = true
             timeText.text = "Время: " + time
         }
-    }
-
-    MessageDialog {
-        id: warningDialog
-        modality: Qt.WindowModal
-        icon: StandardIcon.Information
-        title: "Предупреждение!"
-        text: "Вы не выбрали файл!"
     }
 }
 

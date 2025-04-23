@@ -2,22 +2,24 @@ import QtQuick 2.12
 import QtQuick.Window 2.12
 import QtQml 2.0
 import QtQuick.Dialogs 1.2
+import CustomPlotItem 1.0
 
 Window {
-    id:mainWind
-    width: 640
-    height: 480
+    width: 1024
+    height: 640
     visible: true
-    title: qsTr("Визуализация записей сигналов")
+    title: qsTr("Визуализация сигналов")
 
     Connections {
-        target: fileProcessing
+        target: fpWrapper
         onCalculationReady: {
-            dataGraph.drawGraph(typeName);
+            customGraph.drawGraph();
+            topBar.enableButton();
         }
         onFileError: {
             errorDialog.text = error
             errorDialog.open()
+            topBar.enableButton();
         }
         onShowDateTime: {
             topBar.setDate(fileDate);
@@ -32,13 +34,18 @@ Window {
         height: 30
     }
 
-    DataGraph {
-        id: dataGraph
+    CustomPlotItem {
+        id:customGraph
         anchors.top: topBar.bottom
         anchors.bottom: parent.bottom
         anchors.right: parent.right
         anchors.left: parent.left
         width: parent.width
+        Component.onCompleted: initCustomPlot()
+
+        function drawGraph() {
+            fpWrapper.drawGraph(CustomPlotItem)
+        }
     }
 
     MessageDialog {
@@ -49,3 +56,5 @@ Window {
         text: "Вы не выбрали файл!"
     }
 }
+
+

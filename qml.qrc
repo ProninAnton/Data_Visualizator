@@ -1,7 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>main.qml</file>
-        <file>DataGraph.qml</file>
         <file>FilePanel.qml</file>
     </qresource>
 </RCC>

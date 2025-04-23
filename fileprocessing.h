@@ -2,10 +2,9 @@
 #define FILEPROCESSING_H
 
 #include <QObject>
-#include <QtCharts/QAbstractSeries>
-#include <QtCharts/QValueAxis>
 #include "idatasource.h"
 #include "s11dataresearch.h"
+#include "customplotitem.h"
 
 QT_CHARTS_USE_NAMESPACE
 
@@ -17,19 +16,17 @@ public:
     explicit FileProcessing(QObject *parent = nullptr);
 
 public slots:
-    void openFile();
-    void drawGraph(QAbstractSeries *series, QValueAxis *axisX, QValueAxis *axisY);
+    void openFile(QString fileName);
 
 signals:
-    void calculationReady(QString typeName);
+    void calculationReady(IDataSource *_source);
     void fileError(QString error);
-    void showDateTime(QString fileDate, QString fileTime);
 
 private:
     QStringList makeFilters();
 
     IDataSource *_source;
-    QString _dataType;
+    QThread *thread;
 };
 
 #endif // FILEPROCESSING_H

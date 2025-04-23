@@ -14,7 +14,7 @@ public:
 
     QString readFile(const QString fileName) override;
 
-    QVector<QPointF> getData() const override;
+    void getData(QVector<double> &xAxis, QVector<double> &yAxis) const override;
 
     void getDateTime(QString &date, QString &time) override;
 
@@ -22,13 +22,12 @@ public:
 
 private:
     bool isValid(QTextStream &in); //Проверка валидности файла
-
-    std::vector<double> complexCalculation(const std::vector<std::complex<double>> vectorCmplx);
+    // Получение значения s11 из комплексныого числа
+    QVector<double> complexCalculation(const std::vector<std::complex<double>> vectorCmplx);
     size_t lineCount(const QString fileName); //ф-ция подсчета строк в файле
-    void generateData(const int pointsCount, const std::vector<double> frequencyX,
-                      const std::vector<double> s11ResY);
 
-    QVector<QPointF> s11_data;
+    QVector<double> s11_frequency;
+    QVector<double> s11_value;
     double  s11_xMin;
     double  s11_xMax;
     double  s11_yMin;

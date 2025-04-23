@@ -1,13 +1,14 @@
 #include <QApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
-#include "fileprocessing.h"
+#include "fileprocessingwrapper.h"
+#include "customplotitem.h"
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-
     QApplication app(argc, argv);
+
+    qmlRegisterType<CustomPlotItem>("CustomPlotItem",1,0,"CustomPlotItem");
 
     QQmlApplicationEngine engine;
     const QUrl url(QStringLiteral("qrc:/main.qml"));
@@ -16,8 +17,8 @@ int main(int argc, char *argv[])
         if (!obj && url == objUrl)
             QCoreApplication::exit(-1);
     }, Qt::QueuedConnection);
-    FileProcessing fileProcess(&app);
-    engine.rootContext()->setContextProperty("fileProcessing", &fileProcess);
+    FileProcessingWrapper fpWrapper(&app);
+    engine.rootContext()->setContextProperty("fpWrapper", &fpWrapper);
     engine.load(url);
 
     return app.exec();

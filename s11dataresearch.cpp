@@ -13,8 +13,9 @@ QString S11DataResearch::readFile(QString fileName) {
     QTextStream in(&file);
     in.setCodec("Windows-1251");
     int dataCount = lineCount(fileName);
-    std::vector<double> frequency(dataCount);
+    s11_frequency.resize(dataCount);
     std::vector<std::complex<double>> s11Complex(dataCount);
+    QRegExp validDataRegExp("[1-9].[0-9]{,11}[E|e][+|-][0-9]{,2}");
     int i = 0;
     if (isValid(in)) {
         QStringList dataItems;
@@ -22,10 +23,11 @@ QString S11DataResearch::readFile(QString fileName) {
         while (!in.atEnd()) {
             line = in.readLine();
             dataItems = line.split(QRegExp("\\s+"));
-            if (QVariant(dataItems[0]).canConvert<double>() &&
-                    QVariant(dataItems[0]).canConvert<double>() &&
-                    QVariant(dataItems[0]).canConvert<double>()) {
-                frequency[i] = dataItems[0].toDouble();
+            // Проверка данных на соответствие вычисляемым значениям
+            if (dataItems[0].contains(validDataRegExp) &&
+                dataItems[1].contains(validDataRegExp) &&
+                dataItems[2].contains(validDataRegExp)) {
+                s11_frequency[i] = dataItems[0].toDouble();
                 s11Complex[i] = std::complex<double>(dataItems[1].toDouble(), dataItems[2].toDouble());
             }
             else {
@@ -33,23 +35,22 @@ QString S11DataResearch::readFile(QString fileName) {
             }
             ++i;
         }
-        frequency.resize(i-1);
+        s11_frequency.resize(i-1);
         s11Complex.resize(i-1);
     }
     else {
         return "Неподходящий формат данных!";
     }
-    std::vector<double> s11Value = complexCalculation(s11Complex);
-    s11_xMin = frequency[0];
-    s11_xMax = frequency[i-1];
-    generateData(i-1, frequency, s11Value);
+    s11_value = complexCalculation(s11Complex);
+    s11_xMin = s11_frequency[0];
+    s11_xMax = s11_frequency[i-2];
     return "Ok";
 }
 
 bool S11DataResearch::isValid(QTextStream &in)
 {
     QString header = in.readLine();
-    if (header[0] == '#' && header.mid(1).contains("Hz S RI R 50")) {
+    if (header[0] == '#' && header.mid(1).contains(QRegExp("Hz S RI R 50"))) {
         header = in.readLine();
         if (header[0] == '!' && header.mid(1).contains("Date:")) {
             QStringList dateTime = header.split(QRegExp("\\s+"));
@@ -92,9 +93,10 @@ size_t S11DataResearch::lineCount(const QString fileName)
     return lcount + 1;
 }
 
-QVector<QPointF> S11DataResearch::getData() const
+void S11DataResearch::getData(QVector<double> &xAxis, QVector<double> &yAxis) const
 {
-    return s11_data;
+    xAxis = s11_frequency;
+    yAxis = s11_value;
 }
 
 void S11DataResearch::getDateTime(QString &date, QString &time)
@@ -111,12 +113,12 @@ void S11DataResearch::getGraphGeometry(qreal &xMin, qreal &xMax, qreal &yMin, qr
     yMax = s11_yMax;
 }
 //Расчет значения s11 из комплексного числа
-std::vector<double> S11DataResearch::complexCalculation(const std::vector<std::complex<double> > vectorCmplx)
+QVector<double> S11DataResearch::complexCalculation(const std::vector<std::complex<double>> vectorCmplx)
 {
     s11_yMin = __DBL_MAX__;
     s11_yMax = (__DBL_MAX__)*(-1);
     unsigned int dataSize = vectorCmplx.size();
-    std::vector<double> s11Res(dataSize);
+    QVector<double> s11Res(dataSize);
     s11Res.resize(vectorCmplx.size());
 
     for (unsigned int i = 0; i < dataSize; ++i) {
@@ -127,20 +129,3 @@ std::vector<double> S11DataResearch::complexCalculation(const std::vector<std::c
     return s11Res;
 }
 
-void S11DataResearch::generateData(const int pointsCount, const std::vector<double> frequencyX,
-                                   const std::vector<double> s11ResY)
-{
-    s11_data.clear();
-    QVector<QPointF> points;
-    points.reserve(pointsCount);
-
-    for (int i = 0; i < pointsCount; ++i) {
-        double x;
-        double y;
-
-        x = frequencyX[i];
-        y = s11ResY[i];
-        points.append(QPointF(x, y));
-    }
-    s11_data.append(points);
-}
