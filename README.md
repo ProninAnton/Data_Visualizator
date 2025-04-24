@@ -1,6 +1,7 @@
-# Визуализатор результатов высокочастотного измерительного оборудования
-## Описание
-Программа предназначена для построения графиков из проведенных измерений. График строится на основании данных о частоте и значения параметра s11 
-## Требованя к сборке
+# Visualizer of results of high-frequency measuring equipment
+## Description
+The program is designed to plot graphs based on measurements taken. The graph is constructed based on the frequency data and the parameter s11 value 
+## Built With
+QCustomPlot the library for working with graphs  https://www.qcustomplot.com/
+## Build Requirements
 * Qt5 >= 5.12
-* Qt Quick >= 2.1
